@@ -1,55 +1,66 @@
 # Nook
 
-Nook is a privacy-first, open-source macOS break reminder that lives in your menu bar and helps you keep a gentler work rhythm without accounts, subscriptions, or cloud syncing.
+<p align="center">
+  <img src="Sources/NookApp/Resources/AppIcon.png" alt="Nook" width="128">
+</p>
 
-**Status:** Early alpha  
-**Platform:** macOS 13+  
-**Distribution:** Source build only for now  
-**Privacy:** Local-only settings, no server component
+<p align="center">
+  <strong>Open-source, privacy-first macOS break reminders for a calmer work rhythm</strong>
+</p>
+
+Nook is a native menu bar app for macOS that helps you take screen breaks without accounts, subscriptions, or cloud syncing.
+
+> Nook is in active development and should be treated as early alpha software. UI details, contributor workflows, and local setup may still change as the app is being hardened.
+
+[Quick Start](#quick-start) · [What Nook Is](#what-nook-is) · [Why Nook Exists](#why-nook-exists) · [What It Feels Like](#what-it-feels-like) · [Current Capabilities](#current-capabilities) · [Repository Map](#repository-map) · [Contributing](#contributing) · [Support](#support)
 
 ## What Nook Is
 
-Nook is a native SwiftUI menu bar app for screen-break reminders on macOS. It combines a simple break timer with context-aware pause behavior so reminders can stay helpful without feeling as interruptive during focused work.
+Nook is a native SwiftUI menu bar app for screen-break reminders on macOS.
 
-## Why This Exists
+It keeps track of your break rhythm locally, offers short and long breaks, and adds lightweight context-aware pause behavior so reminders can stay useful without feeling overly disruptive during focused work.
 
-Healthy break reminders should be available without a paywall, account system, or opaque syncing model. Nook is being built as a community-owned, privacy-first alternative in this category, starting with a practical local-first MVP and growing from there.
+## Why Nook Exists
 
-## Current Status
+Healthy break reminders should be available without a paywall, account system, or opaque syncing model.
 
-Nook is in early alpha. The core app structure is in place, the scheduler works, and the menu bar flow is usable for local development, but the project is not yet packaged as a polished public app.
+Nook is being built as a community-owned, privacy-first alternative in this category: small, local-first, and understandable from the inside out.
 
-Today that means:
+## What It Feels Like
 
-- Expect rough edges in UI, onboarding, and contributor workflows.
-- Expect implementation details and project structure to continue changing.
-- Do not treat the current repo as a notarized, end-user-ready release yet.
+In day-to-day use, Nook is meant to stay quiet until it is helpful:
 
-## Features Available Today
+1. You launch Nook and it lives in the menu bar.
+2. It keeps time for your next break locally.
+3. It gives you a heads-up reminder before the break starts.
+4. It shows a full break overlay when it is time to pause.
+5. You can postpone, skip, end early, or pause reminders depending on the current state and settings.
 
-- Native macOS menu bar app in SwiftUI
-- Break scheduler core in `NookKit`
-- Short and long breaks
-- Heads-up reminder panel
-- Break overlay window
-- Postpone, skip, early end, and manual pause/resume
-- Office hours, idle reset, and launch-at-login wiring
-- Smart pause for full-screen focus
-- Versioned local JSON settings
+The goal is not to create a complicated wellness platform. The goal is to make taking small breaks on macOS feel simple and sustainable.
 
-## Requirements and Local Setup
+## Current Capabilities
 
-There is no packaged or notarized download yet. The current way to try Nook is to build it from source.
+Nook currently provides:
 
-You will need:
+- a native macOS menu bar app in SwiftUI
+- a scheduler core in `NookKit`
+- short and long breaks
+- heads-up reminder panels
+- a break overlay window
+- postpone, skip, early end, and manual pause or resume controls
+- office hours, idle reset, and launch-at-login wiring
+- smart pause for full-screen focus
+- versioned local JSON settings
+
+## Quick Start
+
+The current path is source build only. There is no packaged or notarized public release yet.
+
+Requirements:
 
 - macOS 13 or newer
-- A current Swift toolchain
-- A full Xcode installation for the best local development experience
-
-Clone the repo, then build and run it from the project root.
-
-## Build, Test, and Run
+- a current Swift toolchain
+- a full Xcode installation for the best local development experience
 
 Build the app:
 
@@ -57,7 +68,7 @@ Build the app:
 swift build
 ```
 
-Run the menu bar app:
+Run the app:
 
 ```bash
 swift run Nook
@@ -69,23 +80,29 @@ Force starter setup during local development:
 NOOK_FORCE_ONBOARDING=1 swift run Nook
 ```
 
-Test command:
+Run tests:
 
 ```bash
 swift test
 ```
 
-Notes:
-
-- A full Xcode installation is currently needed for the test workflow in this repository.
-- The public contributor test setup still needs cleanup before it is as smooth as the build and run flow.
+`swift test` currently expects a full Xcode installation in this repository's setup.
 
 ## Known Limitations
 
-- Source build and developer setup are required today.
-- There is no notarized app bundle, packaged release, or Homebrew install yet.
-- Screenshots and demo assets are not included in the README yet.
-- Packaging, notarization, and release distribution are still in progress rather than current deliverables.
+- source build and developer setup are required today
+- there is no notarized app bundle, packaged release, or Homebrew install yet
+- screenshots and demo assets are not included in the README yet
+- packaging and release distribution are still future work rather than current deliverables
+- the contributor-facing test workflow still needs cleanup
+
+## Repository Map
+
+- `Sources/NookApp/`: macOS app shell, menu bar UI, windows, and app coordination
+- `Sources/NookKit/`: scheduler, models, persistence, and platform integration
+- `Tests/`: scheduler, persistence, and app test coverage
+- `docs/`: release and supporting project docs
+- `packaging/`: macOS packaging assets and helper scripts
 
 ## Contributing
 
@@ -93,36 +110,30 @@ Contributions are welcome, especially around scheduler behavior, macOS polish, o
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) for local setup expectations and contribution guidelines. If you find a bug or want to propose a feature, open an issue or feature request in GitHub.
 
+## Support
+
+If you want to support ongoing maintenance, see [SUPPORT.md](SUPPORT.md).
+
 ## Privacy
 
 Nook stores its settings locally in Application Support and does not send data to a server.
-
-## License
-
-Nook is available under the [MIT License](LICENSE).
 
 ## Roadmap
 
 ### Near term
 
-- Polish the reminder and break overlay interactions
-- Improve keyboard accessibility and labeling
-- Strengthen smart timing beyond the current MVP
-- Tighten the public contributor workflow
+- polish the reminder and break overlay interactions
+- improve keyboard accessibility and labeling
+- strengthen smart timing beyond the current MVP
+- tighten the public contributor workflow
 
 ### Later
 
-- Additional smart pause providers such as meetings and video contexts
+- additional smart pause providers such as meetings and video contexts
 - AppleScript or Shortcuts support
 - Focus Filters integration
-- Notarized distribution and release packaging
+- notarized distribution and release packaging
 
-## Repository Follow-Ups
+## License
 
-Before broader public promotion, the repo would benefit from a few standard open-source community docs:
-
-- `SECURITY.md` for vulnerability reporting guidance
-- `CODE_OF_CONDUCT.md` for contributor expectations
-- Optional `SUPPORT.md` if the project wants a support path beyond GitHub issues
-
-After that, the next practical cleanup is repairing the stale test workflow so the repo matches its contributor-facing documentation more closely.
+Nook is available under the [MIT License](LICENSE).
