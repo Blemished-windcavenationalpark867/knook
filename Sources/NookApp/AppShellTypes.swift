@@ -29,7 +29,9 @@ public protocol WindowCoordinator: AnyObject {
     func showBreakReminder(nextBreakDate: Date)
     func hideBreakReminder()
     var isBreakReminderVisible: Bool { get }
+    var currentBreakReminderDate: Date? { get }
     func showBreakOverlay(session: BreakSession)
     func hideBreakOverlay()
     var isBreakOverlayVisible: Bool { get }
+    var currentBreakOverlaySessionID: UUID? { get }
 }

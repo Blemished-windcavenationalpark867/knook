@@ -11,6 +11,8 @@ final class WellnessPanelController {
         dismissTask?.cancel()
 
         let panel = panel ?? makePanel()
+        let frame = activeScreen.visibleFrame
+        panel.setFrameOrigin(NSPoint(x: frame.maxX - 340, y: frame.maxY - 410))
         panel.contentView = NSHostingView(rootView: WellnessPanelView(event: event))
         panel.orderFrontRegardless()
         self.panel = panel
@@ -42,8 +44,6 @@ final class WellnessPanelController {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.collectionBehavior = [.canJoinAllSpaces, .transient]
-        let frame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-        panel.setFrameOrigin(NSPoint(x: frame.maxX - 340, y: frame.maxY - 410))
         return panel
     }
 }

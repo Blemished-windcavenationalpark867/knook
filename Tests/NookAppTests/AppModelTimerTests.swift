@@ -17,6 +17,8 @@ final class AppModelTimerTests: XCTestCase {
         var hideBreakOverlayCalls = 0
         var isBreakReminderVisible = false
         var isBreakOverlayVisible = false
+        var currentBreakReminderDate: Date?
+        var currentBreakOverlaySessionID: UUID?
         var shownBreakReminderDates: [Date] = []
         var shownBreakOverlaySessions: [BreakSession] = []
 
@@ -39,8 +41,10 @@ final class AppModelTimerTests: XCTestCase {
                 onboardingVisible = false
             case .breakReminder:
                 isBreakReminderVisible = false
+                currentBreakReminderDate = nil
             case .breakOverlay:
                 isBreakOverlayVisible = false
+                currentBreakOverlaySessionID = nil
             default:
                 break
             }
@@ -49,6 +53,8 @@ final class AppModelTimerTests: XCTestCase {
         func hideAllTransientWindows() {
             isBreakReminderVisible = false
             isBreakOverlayVisible = false
+            currentBreakReminderDate = nil
+            currentBreakOverlaySessionID = nil
         }
 
         func isVisible(_ route: WindowRoute) -> Bool {
@@ -67,23 +73,27 @@ final class AppModelTimerTests: XCTestCase {
         func showBreakReminder(nextBreakDate: Date) {
             showBreakReminderCalls += 1
             isBreakReminderVisible = true
+            currentBreakReminderDate = nextBreakDate
             shownBreakReminderDates.append(nextBreakDate)
         }
 
         func hideBreakReminder() {
             hideBreakReminderCalls += 1
             isBreakReminderVisible = false
+            currentBreakReminderDate = nil
         }
 
         func showBreakOverlay(session: BreakSession) {
             showBreakOverlayCalls += 1
             isBreakOverlayVisible = true
+            currentBreakOverlaySessionID = session.id
             shownBreakOverlaySessions.append(session)
         }
 
         func hideBreakOverlay() {
             hideBreakOverlayCalls += 1
             isBreakOverlayVisible = false
+            currentBreakOverlaySessionID = nil
         }
     }
 

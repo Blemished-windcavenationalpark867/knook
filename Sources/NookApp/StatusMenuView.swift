@@ -4,6 +4,7 @@ import SwiftUI
 
 struct StatusMenuView: View {
     @ObservedObject var model: AppModel
+    var dismiss: () -> Void
 
     var body: some View {
         if model.menuBarMode == .setup {
@@ -14,102 +15,125 @@ struct StatusMenuView: View {
     }
 
     private var setupMenu: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Nook")
-                .font(.title3.weight(.semibold))
-
+        VStack(alignment: .leading, spacing: 0) {
             Text("Start with the recommended setup or adjust it before you begin.")
-                .font(.callout)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
 
-            Divider()
+            Divider().padding(.vertical, 4)
 
-            Button("Start Using Nook") {
+            PopoverMenuRow(title: "Start Using Nook", systemImage: "play.fill") {
                 model.dismissStarterSetupWithDefaults()
+                dismiss()
             }
-            .keyboardShortcut(.defaultAction)
 
-            Divider()
+            Divider().padding(.vertical, 4)
 
-            Button("Quit") {
+            PopoverMenuRow(title: "Quit", systemImage: "power") {
                 NSApplication.shared.terminate(nil)
             }
         }
-        .padding(16)
-        .frame(width: 320)
+        .padding(.horizontal, 4)
     }
 
     private var activeMenu: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(model.appState.activeBreak?.kind.title ?? "Nook")
-                .font(.title3.weight(.semibold))
-
+        VStack(alignment: .leading, spacing: 0) {
             Text(model.appState.statusText)
-                .font(.callout)
+                .font(.subheadline)
+                .monospacedDigit()
                 .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
 
-            if let nextBreakDate = model.appState.nextBreakDate, model.appState.activeBreak == nil {
-                LabeledContent("Next break", value: nextBreakDate.formatted(date: .omitted, time: .shortened))
-                LabeledContent(
-                    "Countdown",
-                    value: max(nextBreakDate.timeIntervalSince(model.appState.now), 0).countdownString
-                )
+            Divider().padding(.vertical, 4)
+
+            PopoverMenuRow(title: "Start Break Now", systemImage: "cup.and.saucer") {
+                model.startBreakNow()
+                dismiss()
             }
 
-            if model.appState.activeBreak != nil, let countdownText = model.appState.countdownText {
-                LabeledContent(
-                    "Remaining",
-                    value: countdownText
-                )
+            PopoverMenuRow(title: "Postpone 5 Minutes", systemImage: "clock.arrow.circlepath") {
+                model.postpone(minutes: 5)
+                dismiss()
             }
 
-            Divider()
+            PopoverMenuRow(title: "Postpone 15 Minutes", systemImage: "clock.arrow.circlepath") {
+                model.postpone(minutes: 15)
+                dismiss()
+            }
 
-            VStack(alignment: .leading, spacing: 8) {
-                Button("Start Break Now") {
-                    model.startBreakNow()
-                }
-                .keyboardShortcut("b")
+            PopoverMenuRow(
+                title: model.appState.isPaused ? "Resume Reminders" : "Pause Reminders",
+                systemImage: model.appState.isPaused ? "play.circle" : "pause.circle"
+            ) {
+                model.pauseOrResume()
+                dismiss()
+            }
 
-                Button("Postpone 5 Minutes") {
-                    model.postpone(minutes: 5)
-                }
-
-                Button("Postpone 15 Minutes") {
-                    model.postpone(minutes: 15)
-                }
-
-                Button(model.appState.isPaused ? "Resume Reminders" : "Pause Reminders") {
-                    model.pauseOrResume()
-                }
-
-                if model.appState.activeBreak != nil {
-                    Button("Skip Current Break") {
-                        model.skipCurrentBreak()
-                    }
-
-                    Button("End Break Early") {
-                        model.endBreakEarly()
-                    }
+            if model.appState.activeBreak != nil {
+                PopoverMenuRow(title: "Skip Current Break", systemImage: "forward.end") {
+                    model.skipCurrentBreak()
+                    dismiss()
                 }
 
-                Button("Open Settings") {
-                    if #available(macOS 14, *) {
-                        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                    } else {
-                        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
-                    }
-                    NSApp.activate(ignoringOtherApps: true)
+                PopoverMenuRow(title: "End Break Early", systemImage: "stop.circle") {
+                    model.endBreakEarly()
+                    dismiss()
                 }
             }
 
-            Divider()
+            PopoverMenuRow(title: "Open Settings", systemImage: "gearshape") {
+                if #available(macOS 14, *) {
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                } else {
+                    NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+                }
+                NSApp.activate(ignoringOtherApps: true)
+                dismiss()
+            }
 
-            Button("Quit") {
+            Divider().padding(.vertical, 4)
+
+            PopoverMenuRow(title: "Quit", systemImage: "power") {
                 NSApplication.shared.terminate(nil)
             }
         }
-        .padding(16)
-        .frame(width: 320)
+        .padding(.horizontal, 4)
+    }
+}
+
+private struct PopoverMenuRow: View {
+    let title: String
+    let systemImage: String?
+    let action: () -> Void
+    @State private var isHovered = false
+
+    init(title: String, systemImage: String? = nil, action: @escaping () -> Void) {
+        self.title = title
+        self.systemImage = systemImage
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                        .frame(width: 20)
+                }
+                Text(title)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(isHovered ? .white : .primary)
+        .background(isHovered ? Color(nsColor: NSColor(red: 0.075, green: 0.376, blue: 0.702, alpha: 1.0)) : .clear)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .onHover { isHovered = $0 }
     }
 }

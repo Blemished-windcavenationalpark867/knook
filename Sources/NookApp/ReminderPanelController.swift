@@ -12,6 +12,8 @@ final class ReminderPanelController {
 
     func show(nextBreakDate: Date) {
         let panel = panel ?? makePanel()
+        let frame = activeScreen.visibleFrame
+        panel.setFrameOrigin(NSPoint(x: frame.maxX - 360, y: frame.maxY - 220))
         panel.contentView = NSHostingView(rootView: ReminderPanelView(nextBreakDate: nextBreakDate, model: model))
         panel.orderFrontRegardless()
         self.panel = panel
@@ -36,8 +38,6 @@ final class ReminderPanelController {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.collectionBehavior = [.canJoinAllSpaces, .transient]
-        let frame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-        panel.setFrameOrigin(NSPoint(x: frame.maxX - 360, y: frame.maxY - 220))
         return panel
     }
 }
@@ -52,6 +52,7 @@ private struct ReminderPanelView: View {
                 .font(.headline)
             Text("Your next break starts at \(nextBreakDate.formatted(date: .omitted, time: .shortened)).")
                 .font(.callout)
+                .monospacedDigit()
                 .foregroundStyle(.secondary)
 
             HStack {

@@ -30,8 +30,6 @@ final class AppModel: ObservableObject {
     private var timerCancellable: AnyCancellable?
     private var wakeObserver: NSObjectProtocol?
     private var hasHandledInitialAppLaunch = false
-    private var presentedBreakSessionID: UUID?
-    private var presentedBreakReminderDate: Date?
 
     private lazy var onboardingFlowWindowController = OnboardingFlowWindowController()
     private lazy var breakOverlayController = BreakOverlayWindowController(model: self)
@@ -402,16 +400,14 @@ final class AppModel: ObservableObject {
 
     private func reconcileTimerWindows() {
         if let activeBreak = appState.activeBreak {
-            if !windowCoordinator.isBreakOverlayVisible || presentedBreakSessionID != activeBreak.id {
+            if !windowCoordinator.isBreakOverlayVisible || windowCoordinator.currentBreakOverlaySessionID != activeBreak.id {
                 logger.debug("Showing break overlay session=\(activeBreak.id.uuidString, privacy: .public)")
                 windowCoordinator.showBreakOverlay(session: activeBreak)
-                presentedBreakSessionID = activeBreak.id
             }
 
             if windowCoordinator.isBreakReminderVisible {
                 logger.debug("Hiding break reminder because break is active")
                 windowCoordinator.hideBreakReminder()
-                presentedBreakReminderDate = nil
             }
             return
         }
@@ -420,7 +416,6 @@ final class AppModel: ObservableObject {
             logger.debug("Hiding break overlay because there is no active break")
             windowCoordinator.hideBreakOverlay()
         }
-        presentedBreakSessionID = nil
 
         guard !appState.isPaused,
               appState.reminder != nil,
@@ -430,14 +425,12 @@ final class AppModel: ObservableObject {
                 logger.debug("Hiding break reminder because reminder state is inactive")
                 windowCoordinator.hideBreakReminder()
             }
-            presentedBreakReminderDate = nil
             return
         }
 
-        if !windowCoordinator.isBreakReminderVisible || presentedBreakReminderDate != nextBreakDate {
+        if !windowCoordinator.isBreakReminderVisible || windowCoordinator.currentBreakReminderDate != nextBreakDate {
             logger.debug("Showing break reminder for nextBreakDate=\(nextBreakDate.formatted(date: .omitted, time: .standard), privacy: .public)")
             windowCoordinator.showBreakReminder(nextBreakDate: nextBreakDate)
-            presentedBreakReminderDate = nextBreakDate
         }
     }
 

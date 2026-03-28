@@ -10,6 +10,8 @@ final class AppWindowCoordinator: WindowCoordinator {
     private let breakReminderController: ReminderPanelController
     private let wellnessReminderController: WellnessPanelController
     private let contextualHintController = ContextualHintController()
+    private(set) var currentBreakReminderDate: Date?
+    private(set) var currentBreakOverlaySessionID: UUID?
 
     init(
         model: AppModel,
@@ -84,6 +86,8 @@ final class AppWindowCoordinator: WindowCoordinator {
         wellnessReminderController.hide()
         contextualHintController.hide()
         breakOverlayController.hide()
+        currentBreakReminderDate = nil
+        currentBreakOverlaySessionID = nil
     }
 
     func isVisible(_ route: WindowRoute) -> Bool {
@@ -108,10 +112,12 @@ final class AppWindowCoordinator: WindowCoordinator {
         contextualHintController.hide()
         wellnessReminderController.hide()
         breakReminderController.show(nextBreakDate: nextBreakDate)
+        currentBreakReminderDate = nextBreakDate
     }
 
     func hideBreakReminder() {
         breakReminderController.hide()
+        currentBreakReminderDate = nil
     }
 
     var isBreakReminderVisible: Bool {
@@ -121,13 +127,16 @@ final class AppWindowCoordinator: WindowCoordinator {
     func showBreakOverlay(session: BreakSession) {
         guard !onboardingFlowController.isVisible else { return }
         breakReminderController.hide()
+        currentBreakReminderDate = nil
         wellnessReminderController.hide()
         contextualHintController.hide()
         breakOverlayController.show(session: session)
+        currentBreakOverlaySessionID = session.id
     }
 
     func hideBreakOverlay() {
         breakOverlayController.hide()
+        currentBreakOverlaySessionID = nil
     }
 
     var isBreakOverlayVisible: Bool {
@@ -147,20 +156,21 @@ final class AppWindowCoordinator: WindowCoordinator {
 
 @MainActor
 final class ContextualHintController {
-    private weak var panel: NSPanel?
-    private var hideTask: DispatchWorkItem?
+    private var panel: NSPanel?
+    private var hideTask: Task<Void, Never>?
 
     func show(kind: HintKind) {
+        hideTask?.cancel()
         let panel = panel ?? makePanel()
+        let frame = activeScreen.visibleFrame
+        panel.setFrameOrigin(NSPoint(x: frame.maxX - 330, y: frame.maxY - 340))
         panel.contentView = NSHostingView(rootView: ContextualHintView(kind: kind))
         panel.orderFrontRegardless()
         self.panel = panel
-        hideTask?.cancel()
-        let hideTask = DispatchWorkItem { [weak self] in
+        hideTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(5))
             self?.hide()
         }
-        self.hideTask = hideTask
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: hideTask)
     }
 
     func hide() {
@@ -184,8 +194,6 @@ final class ContextualHintController {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.collectionBehavior = [.canJoinAllSpaces, .transient]
-        let frame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-        panel.setFrameOrigin(NSPoint(x: frame.maxX - 330, y: frame.maxY - 340))
         return panel
     }
 }
