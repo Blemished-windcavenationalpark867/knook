@@ -18,27 +18,11 @@ struct NookApp: App {
         MenuBarExtra {
             StatusMenuView(model: model)
         } label: {
-            menuBarLabel
+            MenuBarLabelView(model: model)
         }
 
         Settings {
             SettingsView(model: model)
         }
-    }
-
-    @ViewBuilder
-    private var menuBarLabel: some View {
-        if let countdownText = model.appState.countdownText, model.launchPhase == .ready {
-            Text(countdownText)
-                .monospacedDigit()
-        } else {
-            MenuBarIcon()
-        }
-    }
-}
-
-private struct MenuBarIcon: View {
-    var body: some View {
-        Image(systemName: "pause.fill")
     }
 }

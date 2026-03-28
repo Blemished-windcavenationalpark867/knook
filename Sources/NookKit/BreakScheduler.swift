@@ -40,6 +40,7 @@ public final class BreakScheduler: @unchecked Sendable {
     private var completedMicroBreaks = 0
     private var postponedUntil: Date?
     private var lastKnownNow: Date?
+    private var idleResetApplied = false
     private var statusText = "Preparing your first session"
     private let smartPauseResumeGracePeriod: TimeInterval = 2 * 60
 
@@ -106,11 +107,16 @@ public final class BreakScheduler: @unchecked Sendable {
         }
 
         if activeBreak == nil, idleSeconds >= settings.scheduleSettings.idleResetThreshold {
-            nextBreakDate = now.addingTimeInterval(settings.breakSettings.workInterval)
-            reminderForBreakDate = nil
-            postponedUntil = nil
-            suppressReminderForCurrentBreak = false
+            if !idleResetApplied {
+                nextBreakDate = now.addingTimeInterval(settings.breakSettings.workInterval)
+                reminderForBreakDate = nil
+                postponedUntil = nil
+                suppressReminderForCurrentBreak = false
+                idleResetApplied = true
+            }
             statusText = "Timer reset after idle time"
+        } else {
+            idleResetApplied = false
         }
 
         if let breakSession = activeBreak {

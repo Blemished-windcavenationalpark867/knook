@@ -61,7 +61,13 @@ final class AppModel: ObservableObject {
     ) {
         self.settingsStore = settingsStore
         self.activityMonitor = activityMonitor
-        let loadedSettings = (try? settingsStore.load()) ?? .default
+        var loadedSettings = (try? settingsStore.load()) ?? .default
+        if let work = launchConfiguration.workIntervalOverride {
+            loadedSettings.breakSettings.workInterval = work
+        }
+        if let brk = launchConfiguration.breakDurationOverride {
+            loadedSettings.breakSettings.microBreakDuration = brk
+        }
         let requiresStarterSetup = Self.requiresStarterSetup(
             settings: loadedSettings,
             launchConfiguration: launchConfiguration
