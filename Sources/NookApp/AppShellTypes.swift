@@ -1,0 +1,29 @@
+import Foundation
+import NookKit
+
+public enum AppLaunchPhase: String, Sendable {
+    case onboarding
+    case ready
+}
+
+public enum MenuBarMode: String, Sendable {
+    case setup
+    case active
+}
+
+public enum WindowRoute: Hashable, Sendable {
+    case onboardingFlow
+    case settings
+    case breakReminder
+    case wellnessReminder(WellnessReminderKind)
+    case contextualHint(HintKind)
+    case breakOverlay(BreakSession)
+}
+
+@MainActor
+public protocol WindowCoordinator: AnyObject {
+    func show(_ route: WindowRoute)
+    func hide(_ route: WindowRoute)
+    func hideAllTransientWindows()
+    func isVisible(_ route: WindowRoute) -> Bool
+}
