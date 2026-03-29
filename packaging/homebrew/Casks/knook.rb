@@ -1,6 +1,6 @@
 cask "knook" do
-  version "0.1.3"
-  sha256 "5ef5e574f54ae3ebc4581dee6ab89df70943568ff25b464da253c406efedb4e9"
+  version "0.1.6"
+  sha256 "be334d0df1403d94a5258f0c4bb1a6fe12112af2fb1515924e2d1b7e32e20ce2"
 
   url "https://github.com/preetsuthar17/knook/releases/download/v#{version}/knook-#{version}.dmg"
   name "knook"
