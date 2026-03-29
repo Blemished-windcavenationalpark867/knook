@@ -10,6 +10,7 @@ final class AppModelUpdateTests: XCTestCase {
         private let stateSubject = CurrentValueSubject<UpdateState, Never>(.idle)
         private(set) var checkForUpdatesCallCount = 0
         private(set) var installAvailableUpdateCallCount = 0
+        private(set) var installViaTerminalFallbackCallCount = 0
 
         var statePublisher: AnyPublisher<UpdateState, Never> {
             stateSubject.eraseToAnyPublisher()
@@ -25,6 +26,10 @@ final class AppModelUpdateTests: XCTestCase {
 
         func installAvailableUpdate() {
             installAvailableUpdateCallCount += 1
+        }
+
+        func installViaTerminalFallback() {
+            installViaTerminalFallbackCallCount += 1
         }
     }
 
@@ -72,7 +77,6 @@ final class AppModelUpdateTests: XCTestCase {
         updateManager.emit(.available(version: "0.2.0", releaseURL: nil))
         model.installAvailableUpdate()
 
-        XCTAssertEqual(model.updateState, .installing)
         XCTAssertEqual(updateManager.installAvailableUpdateCallCount, 1)
     }
 

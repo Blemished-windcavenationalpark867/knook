@@ -6,6 +6,8 @@ enum UpdateState: Equatable {
     case idle
     case available(version: String, releaseURL: URL?)
     case installing
+    case installingProgress(step: String)
+    case installed
     case error(String)
 
     var isAvailable: Bool {
@@ -42,6 +44,7 @@ protocol UpdateManaging: AnyObject {
     var statePublisher: AnyPublisher<UpdateState, Never> { get }
     func checkForUpdates()
     func installAvailableUpdate()
+    func installViaTerminalFallback()
 }
 
 @MainActor
@@ -57,6 +60,10 @@ final class NullUpdateManager: UpdateManaging {
     }
 
     func installAvailableUpdate() {
+        stateSubject.send(.error("Update checks are unavailable for this build."))
+    }
+
+    func installViaTerminalFallback() {
         stateSubject.send(.error("Update checks are unavailable for this build."))
     }
 }
@@ -79,6 +86,7 @@ protocol BrewPathProviding: Sendable {
 protocol ExternalUpdateHandling: Sendable {
     func openTerminal(with command: String) throws
     func openURL(_ url: URL)
+    func quitAndRelaunch() throws
 }
 
 struct URLSessionGitHubReleaseFetcher: GitHubReleaseFetching {
@@ -149,6 +157,37 @@ struct SystemExternalUpdateHandler: ExternalUpdateHandling {
         NSWorkspace.shared.open(url)
     }
 
+    func quitAndRelaunch() throws {
+        let bundleURL = Bundle.main.bundleURL
+        // Prefer the .app bundle path. If running from a non-.app context
+        // (e.g. swift run), fall back to the Homebrew cask install location.
+        let appPath: String
+        if bundleURL.pathExtension == "app" {
+            appPath = bundleURL.path
+        } else {
+            appPath = "/Applications/knook.app"
+        }
+
+        let pid = ProcessInfo.processInfo.processIdentifier
+
+        let script = """
+        while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done
+        open "\(appPath)"
+        """
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", script]
+        process.standardInput = FileHandle.nullDevice
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try process.run()
+
+        DispatchQueue.main.async {
+            NSApplication.shared.terminate(nil)
+        }
+    }
+
     private static func appleScriptStringLiteral(_ string: String) -> String {
         "\"\(string.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\""))\""
     }
@@ -162,6 +201,7 @@ final class GitHubReleaseUpdateManager: UpdateManaging {
     private let releaseFetcher: any GitHubReleaseFetching
     private let brewPathProvider: any BrewPathProviding
     private let externalHandler: any ExternalUpdateHandling
+    private let brewUpdateRunner: any BrewUpdateRunning
     private let currentVersion: String
     private let releasePageFallbackURL: URL
     private let automaticCheckInterval: TimeInterval
@@ -170,6 +210,7 @@ final class GitHubReleaseUpdateManager: UpdateManaging {
 
     private var automaticCheckTimer: Timer?
     private var checkTask: Task<Void, Never>?
+    private var installTask: Task<Void, Never>?
     private var availableRelease: GitHubRelease?
 
     var currentState: UpdateState {
@@ -184,6 +225,7 @@ final class GitHubReleaseUpdateManager: UpdateManaging {
         releaseFetcher: any GitHubReleaseFetching = URLSessionGitHubReleaseFetcher(),
         brewPathProvider: any BrewPathProviding = DefaultBrewPathProvider(),
         externalHandler: any ExternalUpdateHandling = SystemExternalUpdateHandler(),
+        brewUpdateRunner: any BrewUpdateRunning = BrewUpdateRunner(),
         currentVersion: String = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0",
         releasePageFallbackURL: URL = URL(string: "https://github.com/preetsuthar17/knook/releases/latest")!,
         automaticCheckInterval: TimeInterval = 86_400,
@@ -194,6 +236,7 @@ final class GitHubReleaseUpdateManager: UpdateManaging {
         self.releaseFetcher = releaseFetcher
         self.brewPathProvider = brewPathProvider
         self.externalHandler = externalHandler
+        self.brewUpdateRunner = brewUpdateRunner
         self.currentVersion = currentVersion
         self.releasePageFallbackURL = releasePageFallbackURL
         self.automaticCheckInterval = automaticCheckInterval
@@ -220,18 +263,44 @@ final class GitHubReleaseUpdateManager: UpdateManaging {
             return
         }
 
-        if let brewPath = brewPathProvider.brewPath() {
-            do {
-                try externalHandler.openTerminal(with: Self.homebrewUpdateCommand(using: brewPath))
-                stateSubject.send(.installing)
-            } catch {
-                stateSubject.send(.error("Could not open Terminal for the Homebrew update. \(error.localizedDescription)"))
-            }
+        guard let brewPath = brewPathProvider.brewPath() else {
+            externalHandler.openURL(availableRelease.releaseURL)
+            publishAvailableRelease(availableRelease)
             return
         }
 
-        externalHandler.openURL(availableRelease.releaseURL)
-        publishAvailableRelease(availableRelease)
+        stateSubject.send(.installing)
+
+        let runner = brewUpdateRunner
+        let stateSubject = stateSubject
+        let externalHandler = externalHandler
+
+        installTask = Task { @MainActor in
+            let result = await runner.runUpdate(brewPath: brewPath) { step in
+                stateSubject.send(.installingProgress(step: step))
+            }
+
+            switch result {
+            case .success:
+                stateSubject.send(.installed)
+                do {
+                    try externalHandler.quitAndRelaunch()
+                } catch {
+                    stateSubject.send(.error("Update installed but could not relaunch. Please restart knook manually."))
+                }
+            case let .failure(step, log):
+                stateSubject.send(.error("Update failed during: \(step)\n\(log.suffix(500))"))
+            }
+        }
+    }
+
+    func installViaTerminalFallback() {
+        guard let brewPath = brewPathProvider.brewPath() else { return }
+        do {
+            try externalHandler.openTerminal(with: Self.homebrewUpdateCommand(using: brewPath))
+        } catch {
+            stateSubject.send(.error("Could not open Terminal. \(error.localizedDescription)"))
+        }
     }
 
     private func performAutomaticCheckIfDue() {
@@ -333,7 +402,16 @@ final class GitHubReleaseUpdateManager: UpdateManaging {
 
     static func homebrewUpdateCommand(using brewPath: String) -> String {
         let quotedBrewPath = shellQuoted(brewPath)
-        return "\(quotedBrewPath) tap preetsuthar17/tap && \(quotedBrewPath) update && (\(quotedBrewPath) upgrade --cask knook || \(quotedBrewPath) install --cask knook); printf '\\nRelaunch knook after Homebrew finishes if it replaced the running app.\\n'"
+        return "\(quotedBrewPath) untap preetsuthar17/tap 2>/dev/null; \(quotedBrewPath) tap preetsuthar17/tap && \(quotedBrewPath) update && (\(quotedBrewPath) upgrade --cask knook || \(quotedBrewPath) install --cask knook)"
+    }
+
+    static func homebrewUpdateSteps(using brewPath: String) -> [(label: String, arguments: [String])] {
+        [
+            ("Refreshing tap…", ["untap", "preetsuthar17/tap"]),
+            ("Refreshing tap…", ["tap", "preetsuthar17/tap"]),
+            ("Updating Homebrew…", ["update"]),
+            ("Installing knook…", ["upgrade", "--cask", "knook"]),
+        ]
     }
 
     private static func versionComponents(from version: String) -> [Int] {

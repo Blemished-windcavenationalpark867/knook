@@ -12,6 +12,8 @@ var activeScreen: NSScreen {
 
 @MainActor
 enum OverlayWindowHelper {
+    private static var dismissGeneration: UInt64 = 0
+
     static func makeFullscreenWindow() -> NSWindow {
         let window = NSWindow(
             contentRect: .zero,
@@ -33,6 +35,8 @@ enum OverlayWindowHelper {
         fadeDuration: TimeInterval = 0.5,
         timingFunction: CAMediaTimingFunctionName = .easeOut
     ) {
+        dismissGeneration &+= 1
+
         let screenFrame = activeScreen.frame
         window.setFrame(screenFrame, display: true)
 
@@ -61,12 +65,14 @@ enum OverlayWindowHelper {
     }
 
     static func dismissOverlay(_ window: NSWindow, fadeDuration: TimeInterval = 0.4) {
+        let generation = dismissGeneration
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = fadeDuration
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             window.animator().alphaValue = 0
         }, completionHandler: {
             Task { @MainActor in
+                guard generation == dismissGeneration else { return }
                 window.orderOut(nil)
             }
         })

@@ -5,6 +5,7 @@ import SwiftUI
 @MainActor
 final class BreakOverlayWindowController {
     private var window: NSWindow?
+    private var isDismissing = false
     private let model: AppModel
 
     init(model: AppModel) {
@@ -12,6 +13,10 @@ final class BreakOverlayWindowController {
     }
 
     func show(session: BreakSession) {
+        if isDismissing, let window {
+            window.orderOut(nil)
+            isDismissing = false
+        }
         let window = window ?? OverlayWindowHelper.makeFullscreenWindow()
         self.window = window
         OverlayWindowHelper.presentOverlay(
@@ -24,6 +29,7 @@ final class BreakOverlayWindowController {
 
     func hide() {
         guard let window else { return }
+        isDismissing = true
         OverlayWindowHelper.dismissOverlay(window)
     }
 

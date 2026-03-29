@@ -27,6 +27,7 @@ final class GitHubReleaseUpdateManagerTests: XCTestCase {
     private final class MockExternalUpdateHandler: ExternalUpdateHandling, @unchecked Sendable {
         private(set) var terminalCommands: [String] = []
         private(set) var openedURLs: [URL] = []
+        private(set) var quitAndRelaunchCalled = false
 
         func openTerminal(with command: String) throws {
             terminalCommands.append(command)
@@ -34,6 +35,22 @@ final class GitHubReleaseUpdateManagerTests: XCTestCase {
 
         func openURL(_ url: URL) {
             openedURLs.append(url)
+        }
+
+        func quitAndRelaunch() throws {
+            quitAndRelaunchCalled = true
+        }
+    }
+
+    private struct MockBrewUpdateRunner: BrewUpdateRunning {
+        let result: BrewUpdateResult
+
+        func runUpdate(
+            brewPath: String,
+            onProgress: @Sendable @MainActor (String) -> Void
+        ) async -> BrewUpdateResult {
+            await onProgress("Testing…")
+            return result
         }
     }
 
@@ -110,9 +127,10 @@ final class GitHubReleaseUpdateManagerTests: XCTestCase {
         XCTAssertFalse(GitHubReleaseUpdateManager.isVersion("0.1.0", newerThan: "0.1.1"))
     }
 
-    func testInstallAvailableUpdateUsesHomebrewCommandWhenBrewExists() async {
+    func testInstallAvailableUpdateRunsSilentBrewUpdate() async {
         let releaseURL = URL(string: "https://github.com/preetsuthar17/knook/releases/tag/v0.1.2")!
         let externalHandler = MockExternalUpdateHandler()
+        let runner = MockBrewUpdateRunner(result: .success(log: "done"))
         let manager = makeManager(
             fetcher: MockReleaseFetcher(result: .success(.init(
                 version: "v0.1.2",
@@ -121,18 +139,51 @@ final class GitHubReleaseUpdateManagerTests: XCTestCase {
                 isPrerelease: false
             ))),
             brewPathProvider: MockBrewPathProvider(path: "/opt/homebrew/bin/brew"),
-            externalHandler: externalHandler
+            externalHandler: externalHandler,
+            brewUpdateRunner: runner
         )
 
         await manager.checkForUpdatesForTesting()
-
         manager.installAvailableUpdate()
 
-        XCTAssertEqual(
-            externalHandler.terminalCommands,
-            [GitHubReleaseUpdateManager.homebrewUpdateCommand(using: "/opt/homebrew/bin/brew")]
+        // Let the install task complete
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertTrue(externalHandler.terminalCommands.isEmpty)
+        XCTAssertTrue(externalHandler.quitAndRelaunchCalled)
+        XCTAssertEqual(manager.currentState, .installed)
+    }
+
+    func testInstallFailureTransitionsToError() async {
+        let releaseURL = URL(string: "https://github.com/preetsuthar17/knook/releases/tag/v0.1.2")!
+        let externalHandler = MockExternalUpdateHandler()
+        let runner = MockBrewUpdateRunner(result: .failure(step: "Installing knook…", log: "cask not found"))
+        let manager = makeManager(
+            fetcher: MockReleaseFetcher(result: .success(.init(
+                version: "v0.1.2",
+                releaseURL: releaseURL,
+                isDraft: false,
+                isPrerelease: false
+            ))),
+            brewPathProvider: MockBrewPathProvider(path: "/opt/homebrew/bin/brew"),
+            externalHandler: externalHandler,
+            brewUpdateRunner: runner
         )
-        XCTAssertTrue(externalHandler.openedURLs.isEmpty)
+
+        await manager.checkForUpdatesForTesting()
+        manager.installAvailableUpdate()
+
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        guard case .error = manager.currentState else {
+            return XCTFail("Expected error state, got \(manager.currentState)")
+        }
+        XCTAssertFalse(externalHandler.quitAndRelaunchCalled)
+    }
+
+    func testBrewCommandIncludesUntap() {
+        let command = GitHubReleaseUpdateManager.homebrewUpdateCommand(using: "/opt/homebrew/bin/brew")
+        XCTAssertTrue(command.contains("untap preetsuthar17/tap"))
     }
 
     func testInstallAvailableUpdateOpensReleasePageWhenBrewIsMissing() async {
@@ -160,12 +211,14 @@ final class GitHubReleaseUpdateManagerTests: XCTestCase {
     private func makeManager(
         fetcher: any GitHubReleaseFetching,
         brewPathProvider: any BrewPathProviding = MockBrewPathProvider(path: nil),
-        externalHandler: any ExternalUpdateHandling = MockExternalUpdateHandler()
+        externalHandler: any ExternalUpdateHandling = MockExternalUpdateHandler(),
+        brewUpdateRunner: any BrewUpdateRunning = MockBrewUpdateRunner(result: .success(log: ""))
     ) -> GitHubReleaseUpdateManager {
         return GitHubReleaseUpdateManager(
             releaseFetcher: fetcher,
             brewPathProvider: brewPathProvider,
             externalHandler: externalHandler,
+            brewUpdateRunner: brewUpdateRunner,
             currentVersion: "0.1.1",
             automaticCheckInterval: 0,
             userDefaults: .standard,

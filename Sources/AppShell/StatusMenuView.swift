@@ -36,7 +36,6 @@ struct StatusMenuView: View {
                 HStack(spacing: 8) {
                     Button("Update") {
                         model.installAvailableUpdate()
-                        dismiss()
                     }
                     .buttonStyle(.borderedProminent)
 
@@ -54,19 +53,55 @@ struct StatusMenuView: View {
             .padding(.horizontal, 12)
             .padding(.top, 8)
             .padding(.bottom, 4)
+        case .installing:
+            HStack(spacing: 10) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Preparing update…")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+        case let .installingProgress(step):
+            HStack(spacing: 10) {
+                ProgressView()
+                    .controlSize(.small)
+                Text(step)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+        case .installed:
+            HStack(spacing: 10) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                Text("Update installed! Relaunching…")
+                    .font(.subheadline)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
         case let .error(message):
             VStack(alignment: .leading, spacing: 8) {
-                Text("Update check failed")
+                Text("Update failed")
                     .font(.headline)
                 Text(message)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .lineLimit(4)
 
                 HStack(spacing: 8) {
                     Button("Try Again") {
                         model.checkForUpdates()
                     }
                     .buttonStyle(.borderedProminent)
+
+                    Button("Show in Terminal") {
+                        model.retryUpdateInTerminal()
+                        dismiss()
+                    }
+                    .buttonStyle(.bordered)
 
                     Button("Dismiss") {
                         model.dismissUpdateNotice()
@@ -84,7 +119,7 @@ struct StatusMenuView: View {
 
     private var shouldShowUpdateBanner: Bool {
         switch model.updateState {
-        case .available, .error:
+        case .available, .error, .installing, .installingProgress, .installed:
             true
         default:
             false

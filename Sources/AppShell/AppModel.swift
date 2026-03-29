@@ -33,6 +33,7 @@ final class AppModel: ObservableObject {
     private var wakeObserver: NSObjectProtocol?
     private var updateStateCancellable: AnyCancellable?
     private var hasHandledInitialAppLaunch = false
+    private var lastTickDate: Date?
 
     private lazy var settingsWindowController = SettingsWindowController()
     private lazy var onboardingFlowWindowController = OnboardingFlowWindowController()
@@ -139,6 +140,11 @@ final class AppModel: ObservableObject {
             windowCoordinator.hideAllTransientWindows()
             return
         }
+
+        if let lastTickDate, now.timeIntervalSince(lastTickDate) < 0.5 {
+            return
+        }
+        lastTickDate = now
 
         let idleSeconds = activityMonitor.idleSeconds
         let snapshot = scheduler.advance(to: now, idleSeconds: idleSeconds)
@@ -262,8 +268,11 @@ final class AppModel: ObservableObject {
 
     func installAvailableUpdate() {
         guard updateState.isAvailable else { return }
-        updateState = .installing
         updateManager.installAvailableUpdate()
+    }
+
+    func retryUpdateInTerminal() {
+        updateManager.installViaTerminalFallback()
     }
 
     func dismissUpdateNotice() {
@@ -296,8 +305,8 @@ final class AppModel: ObservableObject {
     private func startTimer() {
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
-            .sink { [weak self] date in
-                self?.tick(now: date)
+            .sink { [weak self] _ in
+                self?.tick(now: Date())
             }
     }
 

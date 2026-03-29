@@ -1,6 +1,10 @@
 import Core
 import SwiftUI
 
+enum AppVersion {
+    static let current: String = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.7"
+}
+
 enum SettingsTab: String, CaseIterable, Identifiable {
     case general = "General"
     case duration = "Duration"
@@ -21,11 +25,20 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(SettingsTab.allCases, selection: $selectedTab) { tab in
-                Label(tab.rawValue, systemImage: tab.icon)
-                    .tag(tab)
+            VStack {
+                List(SettingsTab.allCases, selection: $selectedTab) { tab in
+                    Label(tab.rawValue, systemImage: tab.icon)
+                        .tag(tab)
+                }
+                .listStyle(.sidebar)
+
+                Spacer()
+
+                Text("v\(AppVersion.current)")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .padding(.bottom, 12)
             }
-            .listStyle(.sidebar)
             .navigationSplitViewColumnWidth(min: 180, ideal: 180, max: 200)
         } detail: {
             switch selectedTab {
