@@ -12,6 +12,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
     private var lastCloseDate: Date = .distantPast
+    private var lastMenuBarContent: MenuBarLabelContent?
 
     override init() {
         let resolvedUpdateManager = GitHubReleaseUpdateManager()
@@ -125,10 +126,14 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
 
     private func updateStatusBarButton(content: MenuBarLabelContent) {
         guard let button = statusItem.button else { return }
+        guard content != lastMenuBarContent else { return }
+        defer { lastMenuBarContent = content }
+
         let symbolImage = NSImage(
             systemSymbolName: content.symbolName,
             accessibilityDescription: content.accessibilityLabel
         )
+        symbolImage?.isTemplate = true
         button.image = content.showsUpdateBadge ? badgedMenuBarImage(from: symbolImage) : symbolImage
         if let countdown = content.countdownText {
             button.title = countdown
