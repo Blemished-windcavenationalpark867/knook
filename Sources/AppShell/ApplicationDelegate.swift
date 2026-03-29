@@ -49,9 +49,6 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
                 dismiss: { [weak self] in self?.closePopover() }
             )
         )
-        if let button = statusItem.button {
-            pop.appearance = button.effectiveAppearance
-        }
         popover = pop
 
         model.$appState
@@ -83,7 +80,8 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate {
 
     private func openPopover(relativeTo button: NSStatusBarButton) {
         NSApp.activate(ignoringOtherApps: true)
-        popover.appearance = button.effectiveAppearance
+        let isDark = button.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+        popover.contentViewController?.view.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popover.contentViewController?.view.window?.makeKey()
         installEventMonitor()
