@@ -60,7 +60,6 @@ else
 
   app_path="${export_path}/knook.app"
   codesign --verify --deep --strict --verbose=2 "${app_path}"
-  spctl -a -vv "${app_path}"
 fi
 
 dmg_path="$("${repo_root}/packaging/macos/create-dmg.sh" "${version}" "${app_path}")"

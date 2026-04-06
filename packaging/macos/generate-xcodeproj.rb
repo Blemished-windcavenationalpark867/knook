@@ -45,8 +45,8 @@ end
 
 app_target.build_configuration_list.build_configurations.each do |config|
   config.build_settings["ASSETCATALOG_COMPILER_APPICON_NAME"] = "AppIcon"
-  config.build_settings["CODE_SIGN_IDENTITY[sdk=macosx*]"] = "Developer ID Application"
-  config.build_settings["CODE_SIGN_STYLE"] = "Automatic"
+  config.build_settings["CODE_SIGN_IDENTITY"] = "Developer ID Application"
+  config.build_settings["CODE_SIGN_STYLE"] = "Manual"
   config.build_settings["CURRENT_PROJECT_VERSION"] = current_project_version
   config.build_settings["CODE_SIGN_ENTITLEMENTS"] = "packaging/macos/knook.entitlements"
   config.build_settings["DEVELOPMENT_TEAM"] = "BDT655MGNN"
